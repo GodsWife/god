@@ -1,0 +1,26 @@
+func GodDoSomething(ctx Contex){
+  c := make(chan struct{})
+  go func() {
+        defer close(c)
+        wg.Wait()
+  }()
+  
+  ds1ctx ,ds1CancelFunc := context.WithCancel(ctx)
+  wg.Add(1)
+  go DoSomething1(ds1ctx, wg)
+  
+  ds2ctx ,ds2CancelFunc := context.WithCancel(ctx)
+  wg.Add(1)
+  go DoSomething2(ds2ctx, wg)
+  
+  select {
+  case <-c:
+    // Complete normally
+    return
+  case ctx.Done():
+    // Cancel by who call you
+    ds1CancelFunc()
+    ds2CancelFunc()
+    return
+  }
+}
